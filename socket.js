@@ -58,7 +58,11 @@ const get_request = (io, room_name, endpoint, data) => {
   Logger(message, "access");
 
   post.get(params).then((res) => {
-    io.to(room_name).emit("get_requests", res);
+    const response = {
+      ...res,
+      room_name: params.from_room,
+    };
+    io.to(room_name).emit("get_requests", response);
   });
 };
 
@@ -74,7 +78,11 @@ const post_request = (io, room_name, endpoint, data) => {
   Logger(message, "access");
 
   post.send(params).then((res) => {
-    io.to(room_name).emit("post_requests", res);
+    const response = {
+      ...res,
+      room_name: params.from_room,
+    };
+    io.to(room_name).emit("post_requests", response);
   });
 };
 
