@@ -1,49 +1,34 @@
-import POST_TYPES from "./constants.js";
 import post from "./directives.js";
 import Logger from "./logger.js";
 
 const Socket = (socket, io) => {
-  socket.on("join_room", (post) => {
-    // - validate request
-    validate_request(io, post);
+  socket.on("join_room", (room_join_data) => {
+    const { room_name } = room_join_data;
 
-    const { room_name, request_type, endpoint, data } = post;
-
+    // - join the room provided
     socket.join(room_name);
-
-    console.log("A user joined room:", room_name);
 
     // - WRITE ACCESS LOG
     const message = `---ROOM JOINED--- [ROOM NAME] : ${room_name}`;
     Logger(message, "access");
 
-    if (["post", "get"].includes(request_type)) {
-      if (request_type === POST_TYPES.get) {
-        get_request(io, room_name, endpoint, data);
-      } else {
-        post_request(io, room_name, endpoint, data);
-      }
-    }
+    initIO(socket, io);
   });
 };
 
-const validate_request = (io, post) => {
-  const { room_name, data } = post;
-  if (
-    room_name === "" ||
-    room_name === null ||
-    room_name === undefined ||
-    data === "" ||
-    data === null ||
-    data === undefined
-  ) {
-    io.emit("general_message", {
-      message: "Invalid request. Please try again.",
-      status: false,
-    });
+const initIO = (socket, io) => {
+  console.log("initIO");
+  socket.on("post_request", (post_data) => {
+    const { room_name, endpoint, data } = post_data;
 
-    return false;
-  }
+    post_request(io, room_name, endpoint, data);
+  });
+
+  socket.on("get_request", (get_data) => {
+    const { room_name, endpoint, data } = get_data;
+
+    get_request(io, room_name, endpoint, data);
+  });
 };
 
 const get_request = (io, room_name, endpoint, data) => {
