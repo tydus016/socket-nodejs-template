@@ -7,7 +7,10 @@ import path from "path";
  * @var type [String] - debug, access, error
  */
 const Logger = (content, type = "debug") => {
-  const logFilePath = path.join(process.cwd(), "logs", `${type}.log`);
+  const current_date = new Date().toDateString();
+  const file_name = type + "_" + current_date;
+  
+  const logFilePath = path.join(process.cwd(), "logs", `${file_name}.log`);
   const logStream = fs.createWriteStream(logFilePath, { flags: "a" });
   const date_now = dateNow();
 

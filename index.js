@@ -25,7 +25,10 @@ app.get("/socket.io/socket.io.js", (req, res) => {
 ///
 
 app.get("/", (req, resp) => {
-  console.log("a user visited the index page");
+  const message = 'a user visited the index page'
+  console.log(message);
+  Logger(message, "access");
+  
   resp.send({
     message: "Unauthorized Access",
     status: false,
