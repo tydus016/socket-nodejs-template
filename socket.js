@@ -14,6 +14,22 @@ const Socket = (socket, io) => {
 
     initIO(socket, io);
   });
+
+  socket.on("leave_room", (room_leave_data) => {
+    const { room_name } = room_leave_data;
+
+    // - leave the room provided
+    socket.leave(room_name);
+
+    // - WRITE ACCESS LOG
+    const message = `---ROOM LEFT--- [ROOM NAME] : ${room_name}`;
+    Logger(message, "access");
+  });
+
+  socket.on("disconnect", (socket) => {
+    const message = `---SOCKET DISCONNECTION---`;
+    Logger(message, "access");
+  });
 };
 
 const initIO = (socket, io) => {
@@ -59,15 +75,21 @@ const post_request = (io, room_name, endpoint, data) => {
   };
 
   //   - WRITE ACCESS LOG
-  const message = `---POST REQUEST--- [PARAMS] ${JSON.stringify(params)}`;
+  let message = `---POST REQUEST--- [PARAMS] ${JSON.stringify(params)}`;
   Logger(message, "access");
 
   post.send(params).then((res) => {
-    const response = {
-      ...res,
-      room_name: params.from_room,
-    };
-    io.to(room_name).emit("post_requests", response);
+    if (res) {
+      const response = {
+        ...res.data,
+        room_name: params.from_room,
+      };
+
+      io.to(room_name).emit("post_requests", response);
+
+      let message = `---POST REQUEST--- [RESPONSE] ${JSON.stringify(response)}`;
+      Logger(message, "access");
+    }
   });
 };
 
