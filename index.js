@@ -17,6 +17,7 @@ const io = new Server(server, {
 });
 
 app.use(cors());
+app.use(express.json());
 
 // add this
 app.get("/socket.io/socket.io.js", (req, res) => {
@@ -24,11 +25,39 @@ app.get("/socket.io/socket.io.js", (req, res) => {
 });
 ///
 
+app.post("/emitter", (req, resp) => {
+  try {
+    const { event, data, room } = req.body;
+
+    if (room && room !== null) {
+      io.to(room).emit(event, data);
+    } else {
+      io.emit(event, data);
+    }
+
+    const message = `---EMITTER--- [EVENT] : ${event} [DATA] : ${JSON.stringify(data)} [ROOM] : ${room}`;
+    Logger(message, "access");
+
+    resp.send({
+      message: "Event Emitted",
+      status: true,
+    });
+  } catch (error) {
+    const message = `---EMITTER--- [ERROR] : ${error.message} : [REQUEST] : ${JSON.stringify(req.body)}`;
+    Logger(message, "error");
+
+    resp.send({
+      message: error.message,
+      status: false,
+    });
+  }
+});
+
 app.get("/", (req, resp) => {
-  const message = 'a user visited the index page'
+  const message = "a user visited the index page";
   console.log(message);
   Logger(message, "access");
-  
+
   resp.send({
     message: "Unauthorized Access",
     status: false,
