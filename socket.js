@@ -45,6 +45,18 @@ const initIO = (socket, io) => {
 
     get_request(io, room_name, endpoint, data);
   });
+
+  socket.on("custom_event", (event_data) => {
+    const { room_name, event_name, send_to_room = false, data } = event_data;
+
+    if (send_to_room) {
+      io.to(room_name).emit(event_name, data);
+    } else {
+      io.emit(event_name, data);
+    }
+
+    Logger("custom_event : " + JSON.stringify(event_data), "access");
+  });
 };
 
 const get_request = (io, room_name, endpoint, data) => {
